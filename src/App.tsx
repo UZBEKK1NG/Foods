@@ -1,18 +1,17 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { IoFastFoodSharp } from "react-icons/io5";
+import { IoFastFoodSharp, IoCloseCircle } from "react-icons/io5";
 import { FoodsProps } from "./Type";
 
 const App = () => {
   let [foods, setFoods] = useState<FoodsProps[]>([]);
-  let [selectFood, setSelectFood] = useState<FoodsProps>();
+  let [selectFood, setSelectFood] = useState<FoodsProps | undefined>();
 
   useEffect(() => {
     axios
       .get("https://www.themealdb.com/api/json/v1/1/search.php?s=beef")
       .then((data) => setFoods(data.data.meals))
       .catch((err) => console.log(err.message));
-    setSelectFood(foods[0]);
   }, []);
 
   return (
@@ -34,25 +33,12 @@ const App = () => {
           />
         </div>
       </nav>
-      <div className="flex justify-center items-center w-[100vw] h-[100vh] bg-slate-200">
-        <div className="shadow-md shadow-orange-700 p-5 rounded-md w-[60vw] h-[60vh]">
-          <h4>{selectFood?.strMeal}</h4>
-          <p>{selectFood?.strInstructions}</p>
-          <iframe
-            width="640"
-            height="360"
-            src={`https://www.youtube.com/embed/${selectFood?.strYoutube.slice(32)}`}
-            title={selectFood?.strMeal}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          ></iframe>
-        </div>
-      </div>
-      <div className="w-11/12 my-0 py-5 mx-auto grid grid-cols-3 gap-2">
+      <div className="w-11/12 my-5 mx-auto grid grid-cols-3 gap-4">
         {foods?.map((item, index) => (
           <div
             key={index}
             className="shadow-md cursor-pointer duration-300 hover:shadow-slate-800 rounded-md shadow-slate-500 p-5"
+            onClick={() => setSelectFood(item)}
           >
             <img src={item.strMealThumb} alt={item.strMeal} />
             <h3 className="text-xl mt-2">
@@ -70,6 +56,26 @@ const App = () => {
           </div>
         ))}
       </div>
+      {selectFood && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white shadow-md shadow-orange-700 p-5 rounded-md w-[80vw] h-[80vh] overflow-auto relative">
+            <IoCloseCircle
+              className="absolute top-2 right-2 text-3xl text-purple-800 cursor-pointer"
+              onClick={() => setSelectFood(undefined)}
+            />
+            <h4 className="text-2xl font-bold mb-4">{selectFood.strMeal}</h4>
+            <p className="mb-4">{selectFood.strInstructions}</p>
+            <iframe
+              className="w-full aspect-video"
+              src={`https://www.youtube.com/embed/${selectFood.strYoutube?.slice(32)}`}
+              title={selectFood.strMeal}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
